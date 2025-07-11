@@ -17,6 +17,7 @@ from app.routers import news
 from app.routers import historical
 from app.routers import admin
 from app.core.init_db import init_db
+from fastapi.middleware.cors import CORSMiddleware
 #------------------------------------------------------------------------
 
 app = FastAPI(
@@ -31,6 +32,14 @@ app = FastAPI(
         {"name": "News", "description": "Stock and global news endpoints."},
         {"name": "Admin", "description": "Admin endpoints."}
     ]
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or ["*"] for all origins (dev only) -- http://localhost:3000
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 #------------------------------------------------------------------------
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
