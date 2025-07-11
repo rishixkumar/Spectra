@@ -11,13 +11,18 @@ Each route uses dependency injection for database sessions and leverages CRUD an
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 #------------------------------------------------------------------------
 from app.schemas.user import UserCreate, UserRead
 #------------------------------------------------------------------------
 from app.core.database import SessionLocal
-from app.core.crud_user import create_user, get_user_by_email, verify_password
+from app.core.crud_user import create_user, get_user_by_email, verify_password, pwd_context
 from app.core.jwt import create_access_token
+from app.models.user import User
+import os
+from pydantic import EmailStr
 #------------------------------------------------------------------------
 
 router = APIRouter()
@@ -34,6 +39,31 @@ def get_db():
         yield db
     finally:
         db.close()
+
+#------------------------------------------------------------------------
+# JWT settings
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = get_user_by_email(db, email)
+    if user is None:
+        raise credentials_exception
+    return user
 
 #------------------------------------------------------------------------
 @router.post("/users/register", response_model=UserRead, tags=["User"])
@@ -81,3 +111,38 @@ def ping():
         dict: Status message.
     """
     return {"status": "ok"}
+
+#------------------------------------------------------------------------
+@router.get("/users/me", response_model=UserRead, tags=["User"])
+def read_current_user(current_user: User = Depends(get_current_user)):
+    """
+    Get the current user's profile.
+    """
+    return current_user
+
+#------------------------------------------------------------------------
+@router.put("/users/me", response_model=UserRead, tags=["User"])
+def update_current_user(update: UserCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Update the current user's profile (email/password).
+    """
+    # Check if email is being changed and if new email is already taken
+    if update.email != current_user.email:
+        existing_user = get_user_by_email(db, update.email)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        current_user.email = update.email
+    # Update password if changed
+    if not verify_password(update.password, current_user.hashed_password):
+        current_user.hashed_password = pwd_context.hash(update.password)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+#------------------------------------------------------------------------
+@router.post("/users/logout", tags=["User"])
+def logout(token: str = Depends(oauth2_scheme)):
+    """
+    Logout endpoint (stateless, for JWT just instruct client to delete token).
+    """
+    return {"message": "Logout successful. Please delete your token on the client."}

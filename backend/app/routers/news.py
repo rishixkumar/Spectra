@@ -27,4 +27,11 @@ def news(symbol: str):
         data = get_news_for_symbol(symbol)
         return data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/news/global", tags=["News"])
+def global_news():
+    """
+    Fetch global news (placeholder: returns empty list or static message).
+    """
+    return {"news": [], "message": "Global news not implemented yet."} 
