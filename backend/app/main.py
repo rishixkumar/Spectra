@@ -13,6 +13,7 @@ from app.routers import user
 from app.routers import watchlist
 from app.routers import stock
 from app.routers import news
+from app.routers import historical
 from app.core.init_db import init_db
 #------------------------------------------------------------------------
 
@@ -26,6 +27,7 @@ app.include_router(user.router)
 app.include_router(watchlist.router)
 app.include_router(stock.router)
 app.include_router(news.router)
+app.include_router(historical.router)
 
 #------------------------------------------------------------------------
 @app.get("/")
