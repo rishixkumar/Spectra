@@ -10,6 +10,7 @@ This is the entry point for the FastAPI application.
 """
 from fastapi import FastAPI
 from app.routers import user
+from app.routers import watchlist
 from app.core.init_db import init_db
 #------------------------------------------------------------------------
 
@@ -25,7 +26,8 @@ def read_root():
     """
     return {"message": "Hello World"}
 
-app.include_router(user.router) 
+app.include_router(user.router)
+app.include_router(watchlist.router)
 
 #------------------------------------------------------------------------
 @app.on_event("startup")
