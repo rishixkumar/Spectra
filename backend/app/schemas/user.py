@@ -30,9 +30,11 @@ class UserRead(BaseModel):
     Attributes:
         id (int): User's unique ID.
         email (EmailStr): User's email address.
+        is_admin (bool): Whether the user is an admin.
     """
     id: int
     email: EmailStr
+    is_admin: bool
 
     class Config:
         orm_mode = True

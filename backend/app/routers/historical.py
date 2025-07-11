@@ -12,7 +12,7 @@ from app.core.historical_data import get_historical_prices
 
 router = APIRouter()
 #------------------------------------------------------------------------
-@router.get("/stock/{symbol}/history", tags=["Stock"])
+@router.get("/stock/{symbol}/history", tags=["Stock History"])
 def historical_prices(
     symbol: str,
     timespan: str = Query("day", enum=["minute", "hour", "day", "week", "month", "quarter", "year"]),
@@ -34,5 +34,26 @@ def historical_prices(
     try:
         data = get_historical_prices(symbol, timespan, from_date, to_date)
         return {"symbol": symbol, "timespan": timespan, "from": from_date, "to": to_date, "prices": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/stock/{symbol}/history/summary", tags=["Stock History"])
+def historical_summary(
+    symbol: str,
+    timespan: str = Query("day", enum=["minute", "hour", "day", "week", "month", "quarter", "year"]),
+    from_date: str = Query("2024-01-01"),
+    to_date: str = Query("2025-07-10")
+):
+    try:
+        data = get_historical_prices(symbol, timespan, from_date, to_date)
+        closes = [d["c"] for d in data if "c" in d]
+        if not closes:
+            return {"symbol": symbol, "timespan": timespan, "from": from_date, "to": to_date, "summary": {}}
+        summary = {
+            "min_close": min(closes),
+            "max_close": max(closes),
+            "avg_close": sum(closes) / len(closes)
+        }
+        return {"symbol": symbol, "timespan": timespan, "from": from_date, "to": to_date, "summary": summary}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

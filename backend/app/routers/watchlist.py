@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.core.crud_watchlist import get_watchlist, add_to_watchlist, remove_from_watchlist
 from app.schemas.watchlist import WatchlistCreate, WatchlistRead
+from app.routers.user import get_current_user
 #------------------------------------------------------------------------
 
 router = APIRouter()
@@ -37,7 +38,7 @@ USER_ID = 1
 
 #------------------------------------------------------------------------
 @router.get("/watchlist", response_model=list[WatchlistRead], tags=["Watchlist"])
-def read_watchlist(db: Session = Depends(get_db)):
+def read_watchlist(current_user = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Retrieve the current user's watchlist.
     Args:
@@ -45,12 +46,12 @@ def read_watchlist(db: Session = Depends(get_db)):
     Returns:
         list[WatchlistRead]: List of watchlist entries.
     """
-    return get_watchlist(db, user_id=USER_ID)
+    return get_watchlist(db, user_id=current_user.id)
 
 
 #------------------------------------------------------------------------
 @router.post("/watchlist", response_model=WatchlistRead, tags=["Watchlist"])
-def add_stock_to_watchlist(item: WatchlistCreate, db: Session = Depends(get_db)):
+def add_stock_to_watchlist(item: WatchlistCreate, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Add a stock to the user's watchlist.
     Args:
@@ -59,11 +60,11 @@ def add_stock_to_watchlist(item: WatchlistCreate, db: Session = Depends(get_db))
     Returns:
         WatchlistRead: The created watchlist entry.
     """
-    return add_to_watchlist(db, user_id=USER_ID, stock_symbol=item.stock_symbol)
+    return add_to_watchlist(db, user_id=current_user.id, stock_symbol=item.stock_symbol)
 
 #------------------------------------------------------------------------
 @router.delete("/watchlist/{stock_symbol}", status_code=204, tags=["Watchlist"])
-def remove_stock_from_watchlist(stock_symbol: str, db: Session = Depends(get_db)):
+def remove_stock_from_watchlist(stock_symbol: str, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Remove a stock from the user's watchlist.
     Args:
@@ -72,6 +73,6 @@ def remove_stock_from_watchlist(stock_symbol: str, db: Session = Depends(get_db)
     Raises:
         HTTPException: If the stock is not found in the watchlist.
     """
-    removed = remove_from_watchlist(db, user_id=USER_ID, stock_symbol=stock_symbol)
+    removed = remove_from_watchlist(db, user_id=current_user.id, stock_symbol=stock_symbol)
     if not removed:
         raise HTTPException(status_code=404, detail="Stock not found in watchlist") 

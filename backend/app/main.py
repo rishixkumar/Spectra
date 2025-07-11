@@ -9,11 +9,13 @@ This is the entry point for the FastAPI application.
 - Runs database initialization on application startup to ensure all tables are created.
 """
 from fastapi import FastAPI
+from fastapi.security import OAuth2PasswordBearer
 from app.routers import user
 from app.routers import watchlist
 from app.routers import stock
 from app.routers import news
 from app.routers import historical
+from app.routers import admin
 from app.core.init_db import init_db
 #------------------------------------------------------------------------
 
@@ -21,13 +23,24 @@ app = FastAPI(
     title="Spectra",
     version="MVP 1.0.0",
     description="Spectra API for user authentication, watchlists, stock data, and news.",
+    openapi_tags=[
+        {"name": "User", "description": "User registration, login, profile, etc."},
+        {"name": "Watchlist", "description": "User watchlist management."},
+        {"name": "Stock", "description": "Stock summary and chart endpoints."},
+        {"name": "Stock History", "description": "Historical OHLCV and stats endpoints."},
+        {"name": "News", "description": "Stock and global news endpoints."},
+        {"name": "Admin", "description": "Admin endpoints."}
+    ]
 )
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 app.include_router(user.router)
 app.include_router(watchlist.router)
 app.include_router(stock.router)
 app.include_router(news.router)
 app.include_router(historical.router)
+app.include_router(admin.router)
 
 #------------------------------------------------------------------------
 @app.get("/")
