@@ -36,7 +36,7 @@ USER_ID = 1
 
 
 #------------------------------------------------------------------------
-@router.get("/watchlist", response_model=list[WatchlistRead])
+@router.get("/watchlist", response_model=list[WatchlistRead], tags=["Watchlist"])
 def read_watchlist(db: Session = Depends(get_db)):
     """
     Retrieve the current user's watchlist.
@@ -49,7 +49,7 @@ def read_watchlist(db: Session = Depends(get_db)):
 
 
 #------------------------------------------------------------------------
-@router.post("/watchlist", response_model=WatchlistRead)
+@router.post("/watchlist", response_model=WatchlistRead, tags=["Watchlist"])
 def add_stock_to_watchlist(item: WatchlistCreate, db: Session = Depends(get_db)):
     """
     Add a stock to the user's watchlist.
@@ -62,7 +62,7 @@ def add_stock_to_watchlist(item: WatchlistCreate, db: Session = Depends(get_db))
     return add_to_watchlist(db, user_id=USER_ID, stock_symbol=item.stock_symbol)
 
 #------------------------------------------------------------------------
-@router.delete("/watchlist/{stock_symbol}", status_code=204)
+@router.delete("/watchlist/{stock_symbol}", status_code=204, tags=["Watchlist"])
 def remove_stock_from_watchlist(stock_symbol: str, db: Session = Depends(get_db)):
     """
     Remove a stock from the user's watchlist.

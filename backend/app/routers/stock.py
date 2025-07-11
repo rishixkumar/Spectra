@@ -13,7 +13,7 @@ from app.core.stock_data import get_stock_summary, get_stock_chart_image
 router = APIRouter()
 
 #------------------------------------------------------------------------
-@router.get("/stock/{symbol}")
+@router.get("/stock/{symbol}", tags=["Stock"])
 def stock_summary(symbol: str):
     """
     Fetch summary data for a given stock symbol.
@@ -33,7 +33,7 @@ def stock_summary(symbol: str):
         raise HTTPException(status_code=500, detail=str(e))
     
 #------------------------------------------------------------------------
-@router.get("/stock/{symbol}/chart")
+@router.get("/stock/{symbol}/chart", tags=["Stock"])
 def stock_chart(symbol: str):
     """
     Fetch a Yahoo Finance chart URL for a given stock symbol.

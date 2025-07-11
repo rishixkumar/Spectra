@@ -12,10 +12,20 @@ from fastapi import FastAPI
 from app.routers import user
 from app.routers import watchlist
 from app.routers import stock
+from app.routers import news
 from app.core.init_db import init_db
 #------------------------------------------------------------------------
 
-app = FastAPI()
+app = FastAPI(
+    title="Spectra",
+    version="MVP 1.0.0",
+    description="Spectra API for user authentication, watchlists, stock data, and news.",
+)
+
+app.include_router(user.router)
+app.include_router(watchlist.router)
+app.include_router(stock.router)
+app.include_router(news.router)
 
 #------------------------------------------------------------------------
 @app.get("/")
@@ -26,10 +36,6 @@ def read_root():
         dict: A welcome message.
     """
     return {"message": "Hello World"}
-
-app.include_router(user.router)
-app.include_router(watchlist.router)
-app.include_router(stock.router)
 
 #------------------------------------------------------------------------
 @app.on_event("startup")
