@@ -5,7 +5,7 @@ This is the entry point for the FastAPI application.
 
 - Initializes the FastAPI app instance.
 - Defines the root endpoint ("/") for a basic health check or welcome message.
-- Includes the user router for user-related API endpoints (registration, login, etc.).
+- Includes all routers for user, watchlist, stock, news, historical, and admin endpoints.
 - Runs database initialization on application startup to ensure all tables are created.
 """
 from fastapi import FastAPI
@@ -32,7 +32,7 @@ app = FastAPI(
         {"name": "Admin", "description": "Admin endpoints."}
     ]
 )
-
+#------------------------------------------------------------------------
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 app.include_router(user.router)
@@ -41,8 +41,8 @@ app.include_router(stock.router)
 app.include_router(news.router)
 app.include_router(historical.router)
 app.include_router(admin.router)
-
 #------------------------------------------------------------------------
+
 @app.get("/")
 def read_root():
     """
@@ -51,7 +51,6 @@ def read_root():
         dict: A welcome message.
     """
     return {"message": "Hello World"}
-
 #------------------------------------------------------------------------
 @app.on_event("startup")
 def on_startup():
