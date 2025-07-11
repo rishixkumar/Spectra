@@ -4,14 +4,12 @@ user.py
 This module defines the SQLAlchemy User model for the FastAPI application.
 
 - User: Represents a user in the system, with id, email, and hashed_password fields.
-- Base: Declarative base for SQLAlchemy models.
+- Base: Declarative base for SQLAlchemy models (imported from models package).
 """
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
+from . import Base
 #------------------------------------------------------------------------
 
-
-Base = declarative_base()
 
 #------------------------------------------------------------------------
 class User(Base):
