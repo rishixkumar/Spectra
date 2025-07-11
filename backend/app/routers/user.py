@@ -36,7 +36,7 @@ def get_db():
         db.close()
 
 #------------------------------------------------------------------------
-@router.post("/users/register", response_model=UserRead)
+@router.post("/users/register", response_model=UserRead, tags=["User"])
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new user.
@@ -54,7 +54,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     return create_user(db, user)
 
 #------------------------------------------------------------------------
-@router.post("/users/login")
+@router.post("/users/login", tags=["User"])
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """
     Authenticate a user and return a JWT access token.
@@ -73,7 +73,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {"access_token": access_token, "token_type": "bearer"}
 
 #------------------------------------------------------------------------
-@router.get("/users/ping")
+@router.get("/users/ping", tags=["User"])
 def ping():
     """
     Health check endpoint for the user service.
